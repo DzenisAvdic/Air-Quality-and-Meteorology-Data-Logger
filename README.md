@@ -55,9 +55,11 @@ LEDs:
 - AQI outside -> 23
 
 ESP32 has micropython firmware version: esp32-idf3-20200902-v1.13.bin, that can be downloaded here: https://micropython.org/download/esp32/
+
 Everything is done using uPyCraft V1.1 for micropython coding.
 
 Finally, it's all assembled and packed inside designed and handmade enclosure.
+
 Thanks to my fellow architects at https://www.instagram.com/osa_lamps/ for providing it for free. Check out their Instagram page, they're designing and making some pretty good lamps.
 
 ![enclosure](https://github.com/DzenisAvdic/Air-Quality-and-Meteorology-Data-Logger/blob/main/images/enclosure_small.jpg)
@@ -70,10 +72,15 @@ In the end, here is the final output inside one line of .txt file. Updated every
 23.12.2020,3,11:52:12,25.13388,45.58258,404.9233,0.0,100.9003,2,100,1023,1,0,N,169
 
 general data (timestamp):
+
 date, day of week, time
+
 indoors air parameters:
+
 temperature, relative humidity, CO2 levels, tVOC levels, PM2.5 levels
+
 outdoors meteorology data:
+
 temperature, realtive humidity, atmospheric pressure, wind speed, wind direction (polar angle), wind direction (cardinal), AQI index
 
 
@@ -82,8 +89,11 @@ temperature, realtive humidity, atmospheric pressure, wind speed, wind direction
 For providing useful resources, thanks to:
 
 https://github.com/fantasticdonkey/uSGP30
+
 https://github.com/nenadfilipovic/esp8266-micropython-weather-station/
+
 https://github.com/micropython/micropython/tree/master/drivers/sdcard
+
 https://github.com/omarbenhamid/micropython-ds1302-rtc
 
 
