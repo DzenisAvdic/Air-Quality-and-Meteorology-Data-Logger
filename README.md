@@ -1,6 +1,6 @@
 # Air-Quality-and-Meteorology-Data-Logger
 
-![data logger](https://github.com/DzenisAvdic/Air-Quality-and-Meteorology-Data-Logger/blob/master/images/data_logger_small.jpg)
+![data logger](https://github.com/DzenisAvdic/Air-Quality-and-Meteorology-Data-Logger/blob/main/images/data_logger_small.jpg)
 
 Collecting good set of data for academic research is always a challenging task. For me, assembling and making this data logger run flawlessly was quite a challenge, since I'm self-taught in this filed. My profession is architecture, and architectural research of interior comfort and indoor air quality needs tools to monitor data related to these topics.
 
@@ -17,4 +17,4 @@ Requirements (thanks to https://e-radionica.com/en/):
 - few LEDs and 220 Ohm resistors
 - more than few wires, and some patience to connect them and solder everything together
 
-![requirements](https://github.com/DzenisAvdic/Air-Quality-and-Meteorology-Data-Logger/blob/master/images/requirements_small.jpg)
+![requirements](https://github.com/DzenisAvdic/Air-Quality-and-Meteorology-Data-Logger/blob/main/images/requirements_small.jpg)
