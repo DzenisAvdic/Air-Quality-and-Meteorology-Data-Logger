@@ -16,5 +16,7 @@ Requirements (thanks to https://e-radionica.com/en/):
 - microSD card module (also from e-radionica) + microSD card (32GB used, can be smaller)
 - few LEDs and 220 Ohm resistors
 - more than few wires, and some patience to connect them and solder everything together
+- 5V power supply (5V, 950mA used)
+
 
 ![requirements](https://github.com/DzenisAvdic/Air-Quality-and-Meteorology-Data-Logger/blob/main/images/requirements_small.jpg)
