@@ -56,6 +56,8 @@ finally:
 
 #SGP30 sensor needs calibration, so here we define txt file to write baseline values
 BASELINE_FILE = "sd/sgp30_iaq_baseline.txt"
+#after reset stored data is used to turn on/off the LEDs
+LAST_READ_DATA_FILE = "sd/web_api_data.txt"
 
 #instantiate SGP30 sensor (carbon dioxide equivalent and total volatile organic compounds)
 I2C_SCL_GPIO = const(18) #SCL on pin 18
@@ -95,8 +97,23 @@ finally:
     #set absolute humidity
     ah = uSGP30.convert_r_to_a_humidity(t, rh)
     sgp30.set_absolute_humidity(ah)
-#start measuring time for next baseline check
-last_baseline_commit_ms = utime.ticks_ms()
+
+#load data stored on file to turn LEDs on/off
+try:
+    with open(LAST_READ_DATA_FILE, "r") as file:
+        current_data = ujson.loads(file.read())
+except OSError as exception:
+    print(exception)
+    print("No valid past found. Reset values")
+    with open(LAST_READ_DATA_FILE, "w") as file:
+      file.write(str("[%s, %s]" % (0, 0)))
+      file.close() #new line
+else:
+    print("Past data found:", current_data)
+    dust=current_data[0]
+    AQI_index=current_data[1]
+finally:
+    pass
 
 #dust sensor define pins
 measurePIN = ADC(Pin(33)) #analog sensor
@@ -169,32 +186,38 @@ led_ext_aq.value(1)
 sleep_ms(1000)
 led_ext_aq.value(0)
 
+#check LED values from stored data
+if int(AQI_index) <=50 and int(AQI_index) >= 0: led_ext_aq.value(1)
+else: led_ext_aq.value(0)
+gc.collect()
+#check LED values from stored data
+if int(dust) >=35: led_int_aq.value(1)
+else: led_int_aq.value(0)
+gc.collect()
+
+#start measuring time for next reset LED data
+last_write_commit_ms = utime.ticks_ms()
+#start measuring time for next baseline check
+last_baseline_commit_ms = utime.ticks_ms()
 
 while True:
   #last measurement from SGP30
   last_iaq_check_ms = utime.ticks_ms()
 
-  if counter >=900: #900 seconds for 15 minutes, you can also use time delta with utime.ticks_ms()
+  if utime.ticks_ms() - last_write_commit_ms > WRITE_INTERVAL_MS: #900 seconds for 15 minutes, you can also use time delta with utime.ticks_ms()
     try:
       #get weather and AQI values from web APIs
         Test = owmapi.WeatherStation('enter your city ID from openweathermap', 'enter your API key from openweathermap')  #City ID, API key
         t_e, r_hum_e, p_e, wind_s, wind_d, direction = Test.get_current_weather('enter your WiFi SSID', 'enter you WiFi password')  #WiFi credentials
         AQI_index = Test.get_AQI_info('enter your WiFi SSID', 'enter you WiFi password')
-    except ValueError:
+    except Exception as eks:
+        print(eks)
         t_e = str("NaN")
         r_hum_e = str("NaN")
         p_e = str("NaN")
         wind_s = str("NaN")
         wind_d = str("NaN")
-        direction = str("NaN")
-        AQI_index = -1
-    except OSError:
-        t_e = str("NaN")
-        r_hum_e = str("NaN")
-        p_e = str("NaN")
-        wind_s = str("NaN")
-        wind_d = str("NaN")
-        direction = str("NaN")
+        smjer = str("NaN")
         AQI_index = -1
 
     #check if AQI index is less than 50, and light up the green LED   
@@ -224,7 +247,9 @@ while True:
     try: #update google sheets with values obtained from APIs for maintenance
         Test = owmapi.WeatherStation('enter your city ID from openweathermap', 'enter your API key from openweathermap')
         Test.post_update('enter your WiFi SSID', 'enter you WiFi password', AQI_index, wind_s, direction)
-    except:
+        print("posted")
+    except Exception as e:
+        print(e)
         gc.collect()
         print('Failed to publish status data.')
     
@@ -237,6 +262,7 @@ while True:
     sleep_ms(500)
     led_success.value(0)
     DATA_FILE.close()
+    last_write_commit_ms = utime.ticks_ms()
 
   #read values from dust PM2.5 sensor
   pm = readDust()
@@ -265,17 +291,14 @@ while True:
     current_baseline = sgp30.get_iaq_baseline()
     with open(BASELINE_FILE, "w") as file:
       file.write(str(current_baseline))
+      file.close()
+    #get current data for LEDs and store on SD card
+    with open(LAST_READ_DATA_FILE, "w") as file:
+      file.write(str("[%s, %s]" % (dust, AQI_index)))
+      file.close()
     print("Baseline commited:", str(current_baseline))
     last_baseline_commit_ms = utime.ticks_ms()
 
-  #reset vales  
-  t_e = str("NaN")
-  r_hum_e = str("NaN")
-  p_e = str("NaN")
-  wind_s = str("NaN")
-  wind_d = str("NaN")
-  direction = str("NaN")
-  AQI_index = -1
   gc.collect()
   
   utime.sleep_ms(MEASURE_INTERVAL_MS - (utime.ticks_ms() - last_iaq_check_ms))
