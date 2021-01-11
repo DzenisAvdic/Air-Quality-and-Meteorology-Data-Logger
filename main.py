@@ -297,6 +297,7 @@ while True:
       file.write(str("[%s, %s]" % (dust, AQI_index)))
       file.close()
     print("Baseline commited:", str(current_baseline))
+    machine.reset()
     last_baseline_commit_ms = utime.ticks_ms()
 
   gc.collect()
