@@ -44,37 +44,37 @@ class WeatherStation:
         value2 = b
         value3 = c
         WeatherStation.use_wifi(network_name, network_pass)
-        status_update = {'value1':value1, 'value2':value2, 'value3':value3} #dictionary to pass values
+        status_update = json.dumps({'value1':value1, 'value2':value2, 'value3':value3}) #dictionary to pass values
         request_headers = {'Content-Type': 'application/json'}
-        try: #create ifttt.com trigger with webhooks and google sheets, add your trigger name to link
-            request = urequests.post('http://maker.ifttt.com/trigger/*here is your trigger name*/with/key/' + key, json=status_update, headers=request_headers)
-            request.close()
-            gc.collect()
-            print("post update success")
-        except:
-            print("post update fail")
+        #create ifttt.com trigger with webhooks and google sheets, add your trigger name to link
+        request = urequests.post('http://maker.ifttt.com/trigger/*here is your trigger name*/with/key/' + key, json=status_update, headers=request_headers)
+        request.close()
+        gc.collect()
+        print("post update success")
             
     def get_AQI_info(self, network_name, network_pass):
         WeatherStation.use_wifi(network_name, network_pass)
-        try:
-            request_url = 'http://api.waqi.info/feed/*add your city and station link*/?token=*add your token obtained from aqicn.com*'
-            response = urequests.get(request_url)
+        request_url = 'http://api.waqi.info/feed/*add your city and station link*/?token=*add your token obtained from aqicn.com*'
+        response = urequests.get(request_url)
+        print("aqi response received")
+        if (response.status_code >=200 and response.status_code <=229):
+            print("aqi response OK")
             aqi_index = str(response.json()['data']['aqi']) #you can read any json data provided, here we read AQI index for PM2.5
             response.close()
             print("AQI read success")
-        except ValueError:
+        else:
+            print("aqi response not good")
             aqi_index = -1
-            print("AQI read fail value")
-        except OSError:
-            aqi_index = -1
-            print("AQI read fail os")
+            response.close()
         return(aqi_index)
 
     def get_current_weather(self, network_name, network_pass):
         WeatherStation.use_wifi(network_name, network_pass)
-        try: #read json data
-          request_url = self.api + '/data/2.5/weather?' + self.city + self.api_key + '&units=metric'
-          response = urequests.get(request_url)
+        request_url = self.api + '/data/2.5/weather?' + self.city + self.api_key + '&units=metric'
+        response = urequests.get(request_url)
+        print("response received")
+        if (response.status_code >=200 and response.status_code <=229):
+          print("response OK")
           temp_e = str(response.json()['main']['temp'])
           r_hum_e = str(response.json()['main']['humidity'])
           p_e = str(response.json()['main']['pressure'])
@@ -86,24 +86,16 @@ class WeatherStation:
           text_direction = dict_direction[direction]
           response.close()
           print("weather read success")
-        except OSError:
+        else:
+          print("response not good")
           temp_e = str("NaN")
           r_hum_e = str("NaN")
           p_e = str("NaN")
           wind_s = str("NaN")
           wind_d = str("NaN")
           degrees = str("NaN")
-          text_direction = str("NaN")
-          print("weather read fail os")
-        except:
-          temp_e = str("NaN")
-          r_hum_e = str("NaN")
-          p_e = str("NaN")
-          wind_s = str("NaN")
-          wind_d = str("NaN")
-          degrees = str("NaN")
-          text_direction = str("NaN")
-          print("weather read fail")
+          text_smjer = str("NaN")
+          response.close()
         return(temp_e, r_hum_e, p_e, wind_s, wind_d, text_direction)
 
 #optional, you can also read json data for weather forecast - not used in main code
